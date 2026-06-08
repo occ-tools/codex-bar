@@ -1,0 +1,41 @@
+package com.codexbar.android.feature.settings
+
+import com.codexbar.android.core.domain.model.AiService
+
+data class SettingsUiState(
+    val credentialAccounts: List<CredentialAccountState> = AiService.entries.map {
+        CredentialAccountState(
+            service = it,
+            accountId = "",
+            label = it.displayName,
+            credential = ServiceCredentialState()
+        )
+    },
+    val refreshIntervalMinutes: Long = 30L,
+    val notificationsEnabled: Boolean = true,
+    val showDeleteConfirmDialog: Boolean = false
+)
+
+data class CredentialAccountState(
+    val service: AiService,
+    val accountId: String,
+    val label: String,
+    val credential: ServiceCredentialState,
+    val isPersisted: Boolean = false
+)
+
+data class ServiceCredentialState(
+    val accessToken: String = "",
+    val refreshToken: String = "",
+    val accountId: String = "", // Codex only
+    val oauthClientId: String = "", // Gemini only
+    val oauthClientSecret: String = "", // Gemini only
+    val expiresAtDisplay: String = "", // Gemini only (read-only)
+    val isValidating: Boolean = false,
+    val validationResult: ValidationResult? = null
+)
+
+sealed class ValidationResult {
+    data object Success : ValidationResult()
+    data class Failure(val message: String) : ValidationResult()
+}

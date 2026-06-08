@@ -1,0 +1,11 @@
+CodexBar Android
+
+This project is based on:
+
+- CodexBar by Peter Steinberger: https://github.com/steipete/CodexBar
+- CodexBar-android by hyunnnchoi: https://github.com/hyunnnchoi/CodexBar-android
+
+Both upstream projects are distributed under the MIT License.
+
+Android compatibility, release workflow, and reliability modifications in this repository were
+prepared for the wangjiehu GitHub account in 2026.
