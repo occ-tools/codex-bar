@@ -16,6 +16,11 @@ Settings for:
 - autostart or background launch page
 - app details fallback
 
+Recent ColorOS 16 / OPlus builds protect some private battery and autostart pages with signature
+permissions. When those pages cannot be opened by third-party apps, CodexBar opens the standard app
+details page so the user can still reach battery, notification, and permission controls without a
+dead shortcut.
+
 Recommended setup:
 
 1. Allow notifications.
@@ -46,4 +51,3 @@ If data becomes stale on a strict OEM ROM:
 2. Open each listed system page and allow CodexBar.
 3. Pull to refresh once from the dashboard.
 4. Reboot the phone and confirm the persistent notification returns after unlock.
-

@@ -133,14 +133,14 @@ class GeminiRepositoryImpl @Inject constructor(
             groups["Pro"]?.let { buckets ->
                 UsageWindow(
                     label = "Pro",
-                    utilization = buckets.maxOf { 1.0 - it.remainingFraction },
+                    utilization = buckets.maxOf { (1.0 - it.remainingFraction).coerceIn(0.0, 1.0) },
                     resetsAt = buckets.mapNotNull { it.resetTime?.let { ts -> parseInstant(ts) } }.minOrNull()
                 )
             },
             groups["Flash"]?.let { buckets ->
                 UsageWindow(
                     label = "Flash",
-                    utilization = buckets.maxOf { 1.0 - it.remainingFraction },
+                    utilization = buckets.maxOf { (1.0 - it.remainingFraction).coerceIn(0.0, 1.0) },
                     resetsAt = buckets.mapNotNull { it.resetTime?.let { ts -> parseInstant(ts) } }.minOrNull()
                 )
             }

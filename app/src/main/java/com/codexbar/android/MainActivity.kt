@@ -1,6 +1,7 @@
 package com.codexbar.android
 
 import android.Manifest
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -37,6 +38,8 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
+    private var deepLinkRoute by mutableStateOf<String?>(null)
+
     private val batteryOptLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) {
@@ -53,6 +56,19 @@ class MainActivity : ComponentActivity() {
             CodexBarTheme {
                 val navController = rememberNavController()
                 val snackbarHostState = remember { SnackbarHostState() }
+                val startDestination = remember { startRouteFromIntent(intent) }
+
+                LaunchedEffect(deepLinkRoute) {
+                    deepLinkRoute?.let { route ->
+                        navController.navigate(route) {
+                            popUpTo("dashboard") {
+                                inclusive = route == "dashboard"
+                            }
+                            launchSingleTop = true
+                        }
+                        deepLinkRoute = null
+                    }
+                }
 
                 // Android 13+ notification permission
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -129,7 +145,7 @@ class MainActivity : ComponentActivity() {
                 ) { paddingValues ->
                     NavHost(
                         navController = navController,
-                        startDestination = "dashboard",
+                        startDestination = startDestination,
                         modifier = Modifier.padding(paddingValues)
                     ) {
                         composable("dashboard") {
@@ -159,6 +175,19 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             }
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        deepLinkRoute = startRouteFromIntent(intent)
+    }
+
+    private fun startRouteFromIntent(intent: Intent?): String {
+        return when (intent?.data?.host) {
+            "settings" -> "settings"
+            else -> "dashboard"
         }
     }
 }

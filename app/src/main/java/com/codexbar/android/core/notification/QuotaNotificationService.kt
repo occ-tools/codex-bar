@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
+import android.view.View
 import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -64,31 +65,11 @@ class QuotaNotificationService @Inject constructor(
         if (!canPostNotifications()) return
 
         val remoteViews = RemoteViews(context.packageName, R.layout.notification_compact)
+        hideAllServiceRows(remoteViews)
 
         // Populate service data
-        quotas.forEachIndexed { index, quota ->
-            if (index >= 3) return@forEachIndexed // Max 3 services
-
-            val maxUtilization = quota.windows.maxOfOrNull { it.utilization } ?: 0.0
-            val progress = (maxUtilization * 100).toInt()
-
-            when (index) {
-                0 -> {
-                    remoteViews.setTextViewText(R.id.service_name_1, quota.displayName)
-                    remoteViews.setProgressBar(R.id.progress_bar_1, 100, progress, false)
-                    remoteViews.setTextViewText(R.id.progress_text_1, "${progress}%")
-                }
-                1 -> {
-                    remoteViews.setTextViewText(R.id.service_name_2, quota.displayName)
-                    remoteViews.setProgressBar(R.id.progress_bar_2, 100, progress, false)
-                    remoteViews.setTextViewText(R.id.progress_text_2, "${progress}%")
-                }
-                2 -> {
-                    remoteViews.setTextViewText(R.id.service_name_3, quota.displayName)
-                    remoteViews.setProgressBar(R.id.progress_bar_3, 100, progress, false)
-                    remoteViews.setTextViewText(R.id.progress_text_3, "${progress}%")
-                }
-            }
+        quotas.take(3).forEachIndexed { index, quota ->
+            bindServiceRow(remoteViews, index, quota)
         }
 
         val elapsed = formatElapsed(quotas.firstOrNull()?.fetchedAt)
@@ -125,6 +106,28 @@ class QuotaNotificationService @Inject constructor(
 
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         manager.notify(NOTIFICATION_ID, notification)
+    }
+
+    private fun hideAllServiceRows(remoteViews: RemoteViews) {
+        listOf(R.id.service_row_1, R.id.service_row_2, R.id.service_row_3).forEach { rowId ->
+            remoteViews.setViewVisibility(rowId, View.GONE)
+        }
+    }
+
+    private fun bindServiceRow(remoteViews: RemoteViews, index: Int, quota: QuotaInfo) {
+        val row = when (index) {
+            0 -> NotificationRowIds(R.id.service_row_1, R.id.service_name_1, R.id.progress_bar_1, R.id.progress_text_1)
+            1 -> NotificationRowIds(R.id.service_row_2, R.id.service_name_2, R.id.progress_bar_2, R.id.progress_text_2)
+            2 -> NotificationRowIds(R.id.service_row_3, R.id.service_name_3, R.id.progress_bar_3, R.id.progress_text_3)
+            else -> return
+        }
+        val maxUtilization = quota.windows.maxOfOrNull { it.utilization.coerceIn(0.0, 1.0) } ?: 0.0
+        val progress = (maxUtilization * 100).toInt()
+
+        remoteViews.setViewVisibility(row.containerId, View.VISIBLE)
+        remoteViews.setTextViewText(row.nameId, quota.displayName)
+        remoteViews.setProgressBar(row.progressId, 100, progress, false)
+        remoteViews.setTextViewText(row.progressTextId, "${progress}%")
     }
 
     fun showResetNotification(quota: QuotaInfo, windowLabel: String) {
@@ -172,4 +175,11 @@ class QuotaNotificationService @Inject constructor(
             Manifest.permission.POST_NOTIFICATIONS
         ) == PackageManager.PERMISSION_GRANTED
     }
+
+    private data class NotificationRowIds(
+        val containerId: Int,
+        val nameId: Int,
+        val progressId: Int,
+        val progressTextId: Int
+    )
 }

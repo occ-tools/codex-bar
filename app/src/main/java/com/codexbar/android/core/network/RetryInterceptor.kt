@@ -17,10 +17,10 @@ class RetryInterceptor(
         var attempt = 0
 
         while (response.code == 429 && attempt < maxRetries) {
-            response.close()
             attempt++
 
             val retryAfter = response.header("Retry-After")?.toLongOrNull()
+            response.close()
             val waitMs = if (retryAfter != null) {
                 min(retryAfter * 1000, maxWaitSeconds * 1000)
             } else {
@@ -32,6 +32,7 @@ class RetryInterceptor(
             try {
                 Thread.sleep(waitMs)
             } catch (_: InterruptedException) {
+                Thread.currentThread().interrupt()
                 throw IOException("Retry interrupted")
             }
 

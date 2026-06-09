@@ -41,6 +41,8 @@ import com.codexbar.android.MainActivity
 import com.codexbar.android.R
 import com.codexbar.android.core.domain.model.AiService
 import com.codexbar.android.core.domain.model.QuotaInfo
+import com.codexbar.android.core.notification.QuotaNotificationService
+import com.codexbar.android.core.notification.RefreshReceiver
 import com.codexbar.android.ui.service.iconRes
 import com.codexbar.android.ui.service.logoColor
 import java.time.Duration
@@ -335,8 +337,9 @@ class RefreshWidgetAction : ActionCallback {
         glanceId: GlanceId,
         parameters: ActionParameters
     ) {
-        val intent = Intent("com.codexbar.android.ACTION_REFRESH")
-        intent.setPackage(context.packageName)
+        val intent = Intent(context, RefreshReceiver::class.java).apply {
+            action = QuotaNotificationService.ACTION_REFRESH
+        }
         context.sendBroadcast(intent)
         QuotaGlanceWidget().update(context, glanceId)
     }

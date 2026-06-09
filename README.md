@@ -39,6 +39,8 @@ Recommended setup for OPPO / OnePlus / realme / ColorOS 16:
 The Settings screen detects the device family and opens the most specific available system page.
 If an OEM hides a private settings activity, CodexBar falls back to the normal Android app details
 page.
+On newer ColorOS 16 / OPlus builds, private battery and autostart pages may be protected by system
+permissions, so the stable app-details fallback is used for those controls.
 
 More detail: [docs/ANDROID_COMPATIBILITY.md](docs/ANDROID_COMPATIBILITY.md).
 

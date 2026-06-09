@@ -30,7 +30,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build and test
-        run: ./gradlew --no-daemon testDebugUnitTest assembleDebug
+        run: ./gradlew --no-daemon lint testDebugUnitTest assembleDebug
 
       - name: Prepare APK asset
         run: |

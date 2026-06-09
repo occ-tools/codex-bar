@@ -95,6 +95,11 @@ object OemCompatibility {
     }
 
     fun batteryOptimizationIntent(context: Context): Intent {
+        val family = detectFamily(Build.MANUFACTURER.orEmpty(), Build.BRAND.orEmpty())
+        if (family in setOf(OemFamily.OPPO, OemFamily.ONEPLUS, OemFamily.REALME)) {
+            return appDetailsIntent(context)
+        }
+
         val packageUri = Uri.parse("package:${context.packageName}")
         val candidates = listOf(
             Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply { data = packageUri },
@@ -109,12 +114,12 @@ object OemCompatibility {
         val family = detectFamily(Build.MANUFACTURER.orEmpty(), Build.BRAND.orEmpty())
         val candidates = when (family) {
             OemFamily.OPPO, OemFamily.ONEPLUS, OemFamily.REALME -> listOf(
+                appDetailsIntent(context),
                 componentIntent("com.coloros.safecenter", "com.coloros.safecenter.permission.startup.StartupAppListActivity"),
                 componentIntent("com.oplus.safecenter", "com.oplus.safecenter.permission.startup.StartupAppListActivity"),
                 componentIntent("com.coloros.oppoguardelf", "com.coloros.powermanager.fuelgaue.PowerUsageModelActivity"),
                 componentIntent("com.oplus.battery", "com.oplus.powermanager.fuelgaue.PowerControlActivity"),
-                componentIntent("com.oplus.battery", "com.oplus.powermanager.fuelgaue.BatteryUsageActivity"),
-                appDetailsIntent(context)
+                componentIntent("com.oplus.battery", "com.oplus.powermanager.fuelgaue.BatteryUsageActivity")
             )
             OemFamily.XIAOMI -> listOf(
                 componentIntent("com.miui.securitycenter", "com.miui.permcenter.autostart.AutoStartManagementActivity"),
